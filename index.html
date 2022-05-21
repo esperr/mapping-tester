@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <link href="https://getbootstrap.com/docs/4.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link href="pmtest.css" rel="stylesheet">
+    <title>
+      PubMed Mapping Tester
+    </title>
+  </head>
+  <body>
+
+    <main role="main">
+      <!-- Main jumbotron for a primary marketing message or call to action -->
+      <div id="topbanner" class="jumbotron">
+        <div class="container">
+          <a id="about" class="btn btn-outline-secondary" href="about.html">About PubMed Mapping Tester</a>
+          <h1 class="display-3">PubMed Mapping Tester</h1>
+        </div>
+      </div>
+
+
+      <div class="container">
+        <div class="row" id="welcome">
+          <div class="col-md-10">
+            <div class="card mb-3">
+              <div class="card-body">
+                <div class="card-title">Compare 'Old' and 'New' PubMed results</div>
+                <p class="card-text">
+                  The newest version of PubMed has brought a lot of changes, most notably the advent of the 'Best Match'
+                  results sort. Another, less obvious change, is an update to how Automatic Term Mapping (ATM) works in the new
+                  version. Curious about how the new version of ATM might change your earlier PubMed searches? Try it out in the search
+                  box below! <em><a href="about.html">(see more)</a></em></p>
+                </div>
+              </div>
+          </div>
+        </div>
+
+          <div class="row">
+            <div class="col-md-7">
+              <div class="card mb-3">
+                <div class="card-body">
+              <form class="form-inline" id="mainsearch">
+                <div class="form-group mb-2">
+                  <input type="text" class="form-control" id="searchstr" size="50">
+                </div>
+              <button id="runsearch" class="btn btn-primary mb-2" type="button">Search</button>
+              </form>
+              </div>
+            </div>
+
+            </div>
+          </div>
+
+          <div class="row" id="resultscomparison">
+            <div class="col-md-6 pmresults">
+              <div class="card mb-3">
+                <div class="card-body">
+                  <div class="card-title">'Old' PubMed Results</div>
+                  <p class="card-text"><span class="counts">Count: </span><span id="oldcount"></span></p>
+                  <p class="card-text"><span class="mapping">Mapping:</span></p>
+                  <p><span id="oldmapping"></span></p>
+
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 pmresults">
+              <div class="card mb-3">
+                <div class="card-body">
+                  <div class="card-title">'New' PubMed Results</div>
+                  <p class="card-text"><span class="counts">Count: </span><span id="newcount"></span></p>
+                  <p class="card-text"><span class="mapping">Mapping:</span></p>
+                  <p><span id="newmapping"></span></p>
+
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div id="loadingModal">
+          	<div>
+          		<h2>Please wait!</h2>
+          		<p>Fetching your two sets of results from NCBI...</p>
+          		<p><img src="loading-bars.svg"></p>
+          	</div>
+          </div>
+
+
+        </div>
+    </main>
+  </body>
+
+
+  <script>
+
+  const form = document.getElementById('mainsearch');
+  const searchterm = form.elements['searchstr'];
+  document.querySelector("#runsearch").addEventListener("click", (e) => { startSearch(); });
+  document.querySelectorAll(".pmresults").forEach(box => { box.style.display = "none" });
+  document.querySelector("#loadingModal").classList.add("invisible");
+
+  let oldCount;
+  let newCount;
+  let oldTranslation;
+  let newTranslation;
+
+  function startSearch() {
+    document.querySelector("#loadingModal").classList.remove("invisible");
+    let mysearchstr = searchterm.value;
+    console.log(mysearchstr);
+    getOldResults(mysearchstr);
+    getNewResults(mysearchstr);
+  }
+
+  function getOldResults(terms) {
+    oldCount = null;
+    fetch('https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?' + new URLSearchParams({
+      db: 'pubmed',
+      usehistory: 'y',
+      term: terms,
+      retmode: 'json',
+      retmax: 0,
+      email: 'ed_sperr@hotmail.com',
+      tool: 'mappingtester',
+    }))
+    .then(response => {
+      // indicates whether the response is successful (status code 200-299) or not
+      if (!response.ok) {
+        throw new Error(`Request failed with status ${reponse.status}`)
+      }
+      return response.json()
+    })
+    .then(data => {
+      let myesearchresult = data.esearchresult;
+      oldCount = myesearchresult.count;
+      oldTranslation = myesearchresult.querytranslation;
+      //checkdone();
+    })
+    .catch(error => console.log(error));
+  }
+
+  function getNewResults(terms) {
+    newCount = null;
+    fetch('https://eutilspreview.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?' + new URLSearchParams({
+      db: 'pubmed',
+      usehistory: 'y',
+      term: terms,
+      retmode: 'json',
+      retmax: 0,
+      email: 'ed_sperr@hotmail.com',
+      tool: 'mappingtester',
+    }))
+    .then(response => {
+      // indicates whether the response is successful (status code 200-299) or not
+      if (!response.ok) {
+        throw new Error(`Request failed with status ${reponse.status}`)
+      }
+      return response.json()
+    })
+    .then(data => {
+      let myesearchresult = data.esearchresult;
+      newCount = myesearchresult.count;
+      newTranslation = myesearchresult.querytranslation;
+      checkdone();
+    })
+    .catch(error => console.log(error));
+  }
+
+  function checkdone() {
+    console.log("oldcount: " + oldCount);
+    console.log("newcount: " + newCount);
+    if (oldCount == null || newCount == null) {
+      setTimeout(checkdone, 50);
+    } else { showResults(); }
+  }
+
+  function showResults() {
+    document.querySelector("#loadingModal").classList.add("invisible");
+    document.querySelectorAll(".pmresults").forEach(box => { box.style.display = "block" })
+    console.log("all done!");
+    document.querySelector("#oldcount").innerHTML = "<span class='totals'>" + oldCount + "<span>";
+    document.querySelector("#oldmapping").textContent = oldTranslation;
+    let newcountStr = "<span class='totals'>"  + newCount + "</span>";
+    translationDiff();
+    if (oldCount != newCount) {
+      let countDiff = Number(newCount) - Number(oldCount);
+      let percentDiff = roundToTwo(countDiff*100/Number(oldCount));
+      console.log(percentDiff);
+      newcountStr = newcountStr + "  <span class='percentdiff'>(" + percentDiff + "% difference)</span>";
+    } else {
+        newcountStr = newcountStr + "  <span class='percentdiff'>(Same result)</span>";
+    }
+    document.querySelector("#newcount").innerHTML = newcountStr;
+  }
+
+  function translationDiff() {
+    const regex = /\[(\w+)\s(\w+)\]/ig;
+    let unspacedOldTrans = oldTranslation.replaceAll(regex, '[$1&nbsp;$2]');
+    let unspacedNewTrans = newTranslation.replaceAll(regex, '[$1&nbsp;$2]');
+    let oldTransArray = unspacedOldTrans.split(' ');
+    let newTransArray = unspacedNewTrans.split(' ');
+    for (i = 0; i < newTransArray.length; i++) {
+      if (oldTransArray.includes(newTransArray[i])) {
+      } else {
+        newTransArray[i] = "<span class='hilite'>" + newTransArray[i] + "</span>"
+      }
+    }
+    document.querySelector("#newmapping").innerHTML = newTransArray.join(' ');
+  }
+
+  function roundToTwo(num) {
+    return +(Math.round(num + "e+2")  + "e-2");
+  }
+
+  document.addEventListener("keydown", (e) => {
+    if(e.keyCode == 13) {
+      //Because FF "helpfully" ignores the spec and treats 'button' the same as 'submit'
+      e.preventDefault();
+      startSearch();
+    }
+  });
+
+  </script>
+</html>

@@ -1,0 +1,100 @@
+
+#topbanner {
+  background-color: #e0ecff;
+  padding-top: 1em;
+  padding-bottom: 1em;
+  }
+
+#about {
+  float: right;
+}
+
+.invisible {
+  visibility: hidden;
+}
+
+.visible {
+  visibility: visible;
+}
+
+.card-title {
+  font-weight: 600;
+}
+
+#footer {
+  margin-top: 4em;
+}
+
+#doc-display {
+  margin-left: 3em;
+  margin-right: 3em;
+  line-height: 1.3;
+}
+
+.docabstract {
+  margin-top: 1em;
+}
+
+.listarticle {
+  line-height: 1;
+  font-size: .9em;
+  margin-bottom: .5em;
+}
+
+.listarticle:hover {
+  color: blue;
+  border-color: blue;
+  box-shadow: 5px 5px 5px lightgray;
+}
+
+#doc-display .card-subtitle {
+  font-size: 1.1em
+}
+
+#currentstatus {
+  font-weight: 600;
+}
+
+#totalsbug .goodnumber {
+  color: green;
+}
+
+#totalsbug .badnumber {
+  color: red;
+}
+
+#totalsbug .skipnumber {
+  color: grey;
+}
+
+.hilite {
+  background-color:#FFFF00;
+}
+
+.totals {
+  font-weight: 600;
+}
+
+.percentdiff {
+  font-style: italic;
+}
+
+.card-title {
+  font-size: 1.3em;
+  color: darkgrey;
+}
+
+#loadingModal {
+   margin-left: auto;
+   margin-right: auto;
+   width: 40%;
+   border: .2em solid grey;
+   padding: 1em;
+   z-index: 9999;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    margin-right: -50%;
+    transform: translate(-50%, -50%);
+  background: white;
+  }
