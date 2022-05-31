@@ -87,6 +87,14 @@
 
         </div>
     </main>
+
+    <footer class="container">
+      <span class="text-muted">Design and contruction by <a href="https://esperr.github.io/about/">Ed Sperr, M.L.I.S.</a>  |
+        Data from <a href="http://www.ncbi.nlm.nih.gov/">NCBI</a>
+       | See the code at <a href="https://github.com/esperr/mapping-tester">GitHub</a></span>
+    </footer>
+    </body>
+
   </body>
 
 
@@ -107,14 +115,13 @@
   function startSearch() {
     document.querySelector("#loadingModal").classList.remove("invisible");
     let mysearchstr = searchterm.value;
-    console.log(mysearchstr);
     getOldResults(mysearchstr);
     getNewResults(mysearchstr);
   }
 
   function getOldResults(terms) {
     oldCount = null;
-    fetch('https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?' + new URLSearchParams({
+    fetch('https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?'  + new URLSearchParams({
       db: 'pubmed',
       usehistory: 'y',
       term: terms,
@@ -132,7 +139,7 @@
     })
     .then(data => {
       let myesearchresult = data.esearchresult;
-      oldCount = myesearchresult.count;
+      oldCount = Number(myesearchresult.count);
       oldTranslation = myesearchresult.querytranslation;
       //checkdone();
     })
@@ -159,7 +166,7 @@
     })
     .then(data => {
       let myesearchresult = data.esearchresult;
-      newCount = myesearchresult.count;
+      newCount = Number(myesearchresult.count);
       newTranslation = myesearchresult.querytranslation;
       checkdone();
     })
@@ -167,8 +174,6 @@
   }
 
   function checkdone() {
-    console.log("oldcount: " + oldCount);
-    console.log("newcount: " + newCount);
     if (oldCount == null || newCount == null) {
       setTimeout(checkdone, 50);
     } else { showResults(); }
@@ -183,15 +188,14 @@
     document.querySelector("#loadingModal").classList.add("invisible");
     document.querySelector("#resultscomparison").classList.remove("invisible");
     //document.querySelectorAll(".pmresults").forEach(box => { box.style.display = "block" })
-    console.log("all done!");
-    document.querySelector("#oldcount").innerHTML = "<span class='totals'>" + oldCount + "<span>";
+    console.log(typeof oldCount);
+    document.querySelector("#oldcount").innerHTML = "<span class='totals'>" + oldCount.toLocaleString("en-US") + "<span>";
     document.querySelector("#oldmapping").textContent = oldTranslation;
-    let newcountStr = "<span class='totals'>"  + newCount + "</span>";
+    let newcountStr = "<span class='totals'>"  + newCount.toLocaleString("en-US") + "</span>";
     translationDiff();
     if (oldCount != newCount) {
-      let countDiff = Number(newCount) - Number(oldCount);
-      let percentDiff = roundToTwo(countDiff*100/Number(oldCount));
-      console.log(percentDiff);
+      let countDiff = newCount - oldCount;
+      let percentDiff = roundToTwo(countDiff*100/oldCount);
       newcountStr = newcountStr + "  <span class='percentdiff'>(" + percentDiff + "% difference)</span>";
     } else {
         newcountStr = newcountStr + "  <span class='percentdiff'>(Same result)</span>";
